@@ -2,6 +2,13 @@ import { HttpError } from "./errors.ts";
 
 type Body = Record<string, unknown>;
 
+// Catches things like 2026-02-30 that match the pattern but aren't real days
+function isRealDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
 // Collects field errors so the client gets all of them in one response
 export class Validator {
   private errors: Record<string, string> = {};
@@ -64,7 +71,7 @@ export class Validator {
 
   date(field: string, opts: { required?: boolean } = {}) {
     const value = this.string(field, opts);
-    if (value && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(Date.parse(value)))) {
+    if (value && !isRealDate(value)) {
       this.errors[field] = "must be a date (YYYY-MM-DD)";
       return null;
     }

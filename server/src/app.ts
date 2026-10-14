@@ -13,9 +13,9 @@ import { statsRouter, type Stats } from "./routes/stats.ts";
 
 const STATS_TTL_MS = 5 * 60 * 1000;
 
-export function createApp(pool: Pool) {
+export function createApp(pool: Pool, options: { statsTtlMs?: number } = {}) {
   const app = express();
-  const statsCache = new TtlCache<Stats>(STATS_TTL_MS);
+  const statsCache = new TtlCache<Stats>(options.statsTtlMs ?? STATS_TTL_MS);
   // Any write to a user's data makes their cached dashboard stale
   const invalidate = (userId: number) => statsCache.delete(String(userId));
 
