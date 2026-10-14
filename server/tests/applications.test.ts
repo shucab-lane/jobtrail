@@ -88,6 +88,10 @@ describe("applications", () => {
     const search = await client.get("/api/applications?q=initech");
     expect(search.body.total).toBe(5);
 
+    const pastEnd = await client.get("/api/applications?status=rejected&limit=2&page=10");
+    expect(pastEnd.body.data).toHaveLength(0);
+    expect(pastEnd.body.total).toBe(5);
+
     const bad = await client.get("/api/applications?status=nope");
     expect(bad.status).toBe(400);
   });

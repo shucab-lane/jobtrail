@@ -66,7 +66,18 @@ export function applicationsRouter(pool: Pool, onChange: (userId: number) => voi
       params
     );
 
-    const total = rows[0]?.total_count ?? 0;
+    // COUNT(*) OVER() comes back empty when the page is past the end, so count separately then
+    let total = rows[0]?.total_count ?? 0;
+    if (rows.length === 0 && page > 1) {
+      const count = await pool.query(
+        `SELECT COUNT(*)::int AS total
+         FROM applications a
+         JOIN companies c ON c.id = a.company_id
+         WHERE ${conditions.join(" AND ")}`,
+        params.slice(0, -2)
+      );
+      total = count.rows[0].total;
+    }
     res.json({
       data: rows.map(({ total_count, ...row }) => row),
       page,

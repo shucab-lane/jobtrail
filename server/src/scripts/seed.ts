@@ -68,7 +68,7 @@ async function seedDemo(pool: ReturnType<typeof createPool>) {
 
   for (let i = 0; i < 28; i++) {
     const status = statuses[i % statuses.length];
-    const appliedDaysAgo = Math.floor((i * 79) % 80);
+    const appliedDaysAgo = i * 3;
     const app = await pool.query(
       `INSERT INTO applications (user_id, company_id, role_title, status, salary_min, salary_max, applied_on, job_url)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
